@@ -1,18 +1,25 @@
 <template>
   <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <!-- <img alt="Vue logo" src="../assets/logo.png"> -->
+    <v-btn color="primary" dark @click.stop="dialogTarget = true">Add a New Target</v-btn>
+    <v-dialog v-model="dialogTarget" max-width="650px">
+      <TargetComponent @clearTarget="dialogTarget = false" />
+    </v-dialog>
   </div>
 </template>
 
 <script>
-// @ is an alias to /src
-import HelloWorld from '@/components/HelloWorld.vue'
+import TargetComponent from '@/components/TargetComponent.vue'
 
 export default {
   name: 'home',
   components: {
-    HelloWorld
-  }
+    TargetComponent
+  },
+  data() {
+    return {
+      dialogTarget: false,
+    };
+  },
 }
 </script>
