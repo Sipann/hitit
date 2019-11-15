@@ -2,13 +2,13 @@
   <v-app>
     <NavBar />
     <v-content>
-      <Home />
+      <router-view />
     </v-content>
   </v-app>
 </template>
 
 <script>
-import Home from './views/Home';
+// import Home from './views/Home';
 import NavBar from './components/Shared/NavBar';
 
 export default {
@@ -16,7 +16,7 @@ export default {
 
   components: {
     NavBar,
-    Home,
+    // Home,
   },
 
   data: () => ({

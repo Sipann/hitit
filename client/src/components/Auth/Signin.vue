@@ -1,0 +1,81 @@
+<template>
+  <v-container>
+    <v-row>
+      <v-col cols="12" sm="8" offset-sm="2" lg="6" offset-lg="3">
+        <v-card class="pa-5">
+          <v-container class="pa-5">
+            <v-form v-model="isFormValid" lazy-validation ref="form" @submit.prevent="signinUser">
+              <v-row>
+                <v-text-field v-model="username"
+                  prepend-icon="mdi-face" 
+                  label="Username" 
+                  type="text"
+                  :rules="usernameRules"
+                  required></v-text-field>
+              </v-row>
+              <v-row>
+                <v-text-field v-model="password"
+                  prepend-icon="mdi-textbox-password"
+                  label="Password"
+                  type="password"
+                  :rules="passwordRules"
+                  required></v-text-field>
+              </v-row>
+              <v-row class="ma-4 d-flex justify-end">
+                <v-btn class="ml-3" type="submit">Signin</v-btn>
+              </v-row>
+              <v-divider></v-divider>
+              <v-row class="ma-4 d-flex align-center">
+                <v-col cols="4">
+                  <h3>Don't have an account?</h3>
+                </v-col>
+                <v-col cols="4"> 
+                  <v-btn @click="goToSignup">Signup</v-btn>
+                </v-col>
+              </v-row>
+            </v-form>
+          </v-container>
+        </v-card>
+      </v-col>
+    </v-row>     
+  </v-container>
+</template>
+
+<script>
+export default {
+  name: 'Signin',
+  data() {
+    return {
+      isFormValid: true,
+      username: '',
+      password: '',
+      // form validation rules
+      usernameRules: [
+        username => !!username || 'Please enter your username',
+      ],
+      passwordRules: [
+        password => !!password || 'Please enter your password',
+      ],
+    };
+  },
+
+  methods: {
+    goToSignup() {
+      this.$router.push('/enter/signup');
+    },
+    signinUser() {
+      if (this.$refs.form.validate()) {
+        let user = {
+          username: this.username,
+          password: this.password,
+        };
+        console.log('sign in user');
+        console.dir(user);
+        // SIGN IN USER WHEN AUTH SET
+        this.$refs.form.reset();
+      }
+    },
+  },
+}
+</script>
+
