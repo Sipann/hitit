@@ -4,7 +4,9 @@ import Home from '../views/Home.vue'
 import Enter from '@/components/Auth/Enter.vue'
 import Signin from '@/components/Auth/Signin.vue'
 import Signup from '@/components/Auth/Signup.vue'
-
+import Profile from '@/components/Auth/Profile.vue'
+import TargetComponent from '@/components/TargetComponent.vue'
+import Targets from '@/components/Targets.vue'
 
 Vue.use(VueRouter)
 
@@ -24,6 +26,21 @@ const routes = [
       { path: 'signin', component: Signin },
       { path: 'signup', component: Signup },
     ],
+  },
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: Profile,
+  },
+  {
+    path: '/targets',
+    name: 'Targets',
+    component: Targets,
+  },
+  {
+    path: '/target',
+    name: 'Target',
+    component: TargetComponent,
   },
   {
     path: '/about',
