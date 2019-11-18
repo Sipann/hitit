@@ -60,7 +60,7 @@ export default {
   data() {
     return {
       sideNav: false,
-      user: null,     // TBU When Auth set up
+      user: null,    
     };
   },
 
