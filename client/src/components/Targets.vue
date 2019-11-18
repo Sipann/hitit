@@ -54,6 +54,7 @@
 </template>
 
 <script>
+import firebase from 'firebase'
 // import TimeStatus from '@/components/TimeStatus.vue';
 
 export default {
@@ -142,6 +143,10 @@ export default {
       if (this.showDone) return this.orderedTargets;
       return targets.filter(target => !target.done);
     },
+  },
+
+  mounted() {
+    console.log('currentUser', firebase.auth().currentUser);
   },
 
   methods: {

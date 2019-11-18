@@ -5,12 +5,20 @@
         <v-card class="pa-5">
           <v-container class="pa-5">
             <v-form v-model="isFormValid" lazy-validation ref="form" @submit.prevent="signinUser">
-              <v-row>
+              <!-- <v-row>
                 <v-text-field v-model="username"
                   prepend-icon="mdi-face" 
                   label="Username" 
                   type="text"
                   :rules="usernameRules"
+                  required></v-text-field>
+              </v-row> -->
+              <v-row>
+                <v-text-field v-model="email"
+                  prepend-icon="mdi-mail" 
+                  label="Email" 
+                  type="text"
+                  :rules="emailRules"
                   required></v-text-field>
               </v-row>
               <v-row>
@@ -42,14 +50,20 @@
 </template>
 
 <script>
+import firebase from 'firebase';
+
 export default {
   name: 'Signin',
   data() {
     return {
       isFormValid: true,
+      email: '',
       username: '',
       password: '',
       // form validation rules
+      emailRules: [
+        email => !!email || 'Please enter your email',
+      ],
       usernameRules: [
         username => !!username || 'Please enter your username',
       ],
@@ -65,14 +79,24 @@ export default {
     },
     signinUser() {
       if (this.$refs.form.validate()) {
-        let user = {
-          username: this.username,
-          password: this.password,
-        };
-        console.log('sign in user');
-        console.dir(user);
-        // SIGN IN USER WHEN AUTH SET
-        this.$refs.form.reset();
+
+        firebase.auth().signInWithEmailAndPassword(this.email, this.password)
+          .then(cred => {
+            console.log('cred.user', cred.user);
+            this.$router.push({ name: 'Targets' })
+          })
+          .catch(err => {
+            console.log('err', err.message);
+          });
+
+        // let user = {
+        //   username: this.username,
+        //   password: this.password,
+        // };
+        // console.log('sign in user');
+        // console.dir(user);
+        // // SIGN IN USER WHEN AUTH SET
+        // this.$refs.form.reset();
       }
     },
   },

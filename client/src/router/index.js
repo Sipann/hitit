@@ -8,6 +8,8 @@ import Profile from '@/components/Auth/Profile.vue'
 import TargetComponent from '@/components/TargetComponent.vue'
 import Targets from '@/components/Targets.vue'
 
+import firebase from 'firebase'
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -22,7 +24,7 @@ const routes = [
     name: 'Enter',
     component: Enter,
     children: [
-      { path: '', component: Signin },
+      // { path: '', component: Signin },
       { path: 'signin', component: Signin },
       { path: 'signup', component: Signup },
     ],
@@ -36,6 +38,9 @@ const routes = [
     path: '/targets',
     name: 'Targets',
     component: Targets,
+    meta: {
+      requiresAuth: true,
+    }
   },
   {
     path: '/target',
@@ -52,10 +57,25 @@ const routes = [
   }
 ]
 
+
+
 const router = new VueRouter({
   mode: 'history',
   base: process.env.BASE_URL,
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  if (to.matched.some(rec => rec.meta.requiresAuth)) {
+    let user = firebase.auth().currentUser;
+    if (user) {
+      next();
+    } else {
+      next({ path: '/enter/signin' })
+    }
+  } else {
+    next();
+  }
 })
 
 export default router

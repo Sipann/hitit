@@ -39,6 +39,12 @@
       </v-btn>
     </v-toolbar-items>
 
+    <v-avatar color="teal" size="48">
+      <span class="white--text ">VA</span>  
+      <!-- Content of Span: TBU -->
+    </v-avatar>
+
+
   </v-app-bar>
   </v-container>
 
@@ -46,6 +52,8 @@
 </template>
 
 <script>
+import firebase from 'firebase';
+
 export default {
   name: 'NavBar',
 
@@ -88,9 +96,22 @@ export default {
     },
   },
 
+  created() {
+    firebase.auth().onAuthStateChanged(user => {
+      if (user) {
+        this.user = user;
+      } else {
+        this.user = null;
+      }
+    })
+  },
+
   methods: {
     signoutUser() {
-      console.log('sign out User - TBU when auth set up');
+      firebase.auth().signOut()
+        .then(() => {
+          this.$router.push('/enter/signin');
+        });
     },
     
     toggleSideNav() {
@@ -98,8 +119,6 @@ export default {
     },
 
   }
-
-
 
 }
 </script>

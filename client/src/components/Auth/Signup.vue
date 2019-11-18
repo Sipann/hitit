@@ -41,14 +41,14 @@
                 <v-btn class="ml-3" type="submit">Signup</v-btn>
               </v-row>
               <v-divider></v-divider>
-              <v-row class="ma-4 d-flex align-center">
+              <!-- <v-row class="ma-4 d-flex align-center">
                 <v-col cols="4">
                   <h3>Already have an account?</h3>
                 </v-col>
                 <v-col cols="4"> 
                   <v-btn @click="goToSignin">Signin</v-btn>
                 </v-col>
-              </v-row>
+              </v-row> -->
             </v-form>
           </v-container>
         </v-card>
@@ -58,8 +58,13 @@
 </template>
 
 <script>
+
+import db from '@/firebase/init';
+import firebase from 'firebase';
+
 export default {
   name: 'Signup',
+
   data() {
     return {
       isFormValid: true,
@@ -82,23 +87,51 @@ export default {
   },
 
   methods: {
-    goToSignin() {
-      this.$router.push('/enter/signin');
-    },
+    // goToSignin() {
+    //   this.$router.push('/enter/signin');
+    // },
     signupUser() {
       if (this.$refs.form.validate()) {
-        let user = {
-          username: this.username,
-          email: this.email,
-          password: this.password,
-        };
-        console.log('sign up user');
-        console.dir(user);
-        // SIGN IN USER WHEN AUTH SET
-        this.$refs.form.reset();
+
+        let ref = db.collection('users').doc(this.username)
+        ref.get().then(doc => {
+          if (doc.exists) {
+            console.log('already exists');
+          } else {
+            firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
+              .then(cred => {
+                ref.set({
+                  targets: [],
+                  user_id: cred.user.uid,
+                })
+              })
+              .then(() => {
+                this.$router.push({ name: 'Targets' })
+              })
+              .catch(err => {
+                console.log('err', err.message);  // Can do something with the err / err.message to display to the user
+              });
+          }
+        })
+
+
+        // let user = {
+        //   username: this.username,
+        //   email: this.email,
+        //   password: this.password,
+        // };
+        // console.log('sign up user');
+        // console.dir(user);
+        // // SIGN IN USER WHEN AUTH SET
+        // this.$refs.form.reset();
       }
     },
-  }
+  },
+
+
 }
 </script>
 
+<style lang="css">
+  
+</style>
