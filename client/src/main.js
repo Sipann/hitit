@@ -5,6 +5,7 @@ import store from './store'
 import vuetify from './plugins/vuetify';
 
 import firebase from 'firebase';
+import { createProvider } from './vue-apollo'
 
 Vue.config.productionTip = false
 
@@ -17,6 +18,7 @@ firebase.auth().onAuthStateChanged(() => {
       router,
       store,
       vuetify,
+      apolloProvider: createProvider(),
       render: h => h(App)
     }).$mount('#app')
   }
