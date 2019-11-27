@@ -39,10 +39,11 @@
       </v-btn>
     </v-toolbar-items>
 
-    <v-avatar color="teal" size="48">
-      <span class="white--text ">VA</span>  
-      <!-- Content of Span: TBU -->
-    </v-avatar>
+    <router-link to="/profile" v-if="user">
+      <v-avatar color="teal" size="48">
+        <span class="white--text ">{{ initial }}</span>  
+      </v-avatar>
+    </router-link>
 
 
   </v-app-bar>
@@ -53,6 +54,7 @@
 
 <script>
 import firebase from 'firebase';
+import { GET_USER_DATA } from '../../queries';
 
 export default {
   name: 'NavBar',
@@ -65,6 +67,12 @@ export default {
   },
 
   computed: {
+
+    // user() {
+    //   return this.$store.state.user;
+    // },
+
+
     horizontalNavItems() {
       let items = [];
       if (this.user) {
@@ -77,6 +85,10 @@ export default {
         ];
       }
       return items;
+    },
+
+    initial() {
+      return this.$store.getters.initial;
     },
 
     sideNavItems() {
@@ -94,19 +106,59 @@ export default {
       }
       return items;
     },
+
+    username() {
+      return this.$store.state.user ? this.$store.state.user.username : '';
+    },
   },
 
   created() {
     firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        this.user = user;
-      } else {
-        this.user = null;
-      }
-    })
-  },
+       if (user) {
+         this.user = user;
+         console.log('auth state changed, we have a user');
+         console.log('this.user', this.user);
+         console.log('this.user.uid', this.user.uid);
+         this.$emit('logged');
+         this.getUserData();
+       } else {
+         console.log('auth state changed, user is NULL');
+         this.user = null;
+       }
+     })
+   },
+  
+
+  // created() {
+  //   firebase.auth().onAuthStateChanged(user => {
+  //     if (user) {
+  //       this.user = user;
+  //       // console.log('this.user.uid', this.user.uid);
+  //       this.getUserData();
+  //     } else {
+  //       this.user = null;
+  //     }
+  //   })
+  // },
 
   methods: {
+
+    async getUserData() {
+      try {
+        let userData = await this.$apollo.query({
+          query: GET_USER_DATA,
+          variables: { userId: this.user.uid }
+        });
+        // console.log('userData', userData);
+        let user = userData.data.user;
+        this.$store.commit('setUser', user);
+      } catch (err) {
+        console.log('err', err);
+      }
+    },
+
+    
+
     signoutUser() {
       firebase.auth().signOut()
         .then(() => {

@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueApollo from 'vue-apollo'
-import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client'
+// import { createApolloClient, restartWebsockets } from 'vue-cli-plugin-apollo/graphql-client'
+import { createApolloClient } from 'vue-cli-plugin-apollo/graphql-client';
 
 // Install the vue plugin
 Vue.use(VueApollo)
@@ -9,7 +10,9 @@ Vue.use(VueApollo)
 const AUTH_TOKEN = 'apollo-token'
 
 // Http endpoint
-const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost:4000/graphql'
+// const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost:4000/graphql'
+// TBU
+const httpEndpoint = process.env.VUE_APP_GRAPHQL_HTTP || 'http://localhost:5000/hitit-3753e/us-central1/graphql'
 
 // Config
 const defaultOptions = {
@@ -17,7 +20,7 @@ const defaultOptions = {
   httpEndpoint,
   // You can use `wss` for secure connection (recommended in production)
   // Use `null` to disable subscriptions
-  wsEndpoint: process.env.VUE_APP_GRAPHQL_WS || 'ws://localhost:4000/graphql',
+  // wsEndpoint: process.env.VUE_APP_GRAPHQL_WS || 'ws://localhost:4000/graphql',
   // LocalStorage token
   tokenName: AUTH_TOKEN,
   // Enable Automatic Query persisting with Apollo Engine
@@ -49,11 +52,12 @@ const defaultOptions = {
 // Call this in the Vue app file
 export function createProvider (options = {}) {
   // Create apollo client
-  const { apolloClient, wsClient } = createApolloClient({
+  // const { apolloClient, wsClient } = createApolloClient({
+  const { apolloClient } = createApolloClient({
     ...defaultOptions,
     ...options,
   })
-  apolloClient.wsClient = wsClient
+  // apolloClient.wsClient = wsClient
 
   // Create vue apollo provider
   const apolloProvider = new VueApollo({
@@ -77,7 +81,7 @@ export async function onLogin (apolloClient, token) {
   if (typeof localStorage !== 'undefined' && token) {
     localStorage.setItem(AUTH_TOKEN, token)
   }
-  if (apolloClient.wsClient) restartWebsockets(apolloClient.wsClient)
+  // if (apolloClient.wsClient) restartWebsockets(apolloClient.wsClient)
   try {
     await apolloClient.resetStore()
   } catch (e) {
@@ -91,7 +95,7 @@ export async function onLogout (apolloClient) {
   if (typeof localStorage !== 'undefined') {
     localStorage.removeItem(AUTH_TOKEN)
   }
-  if (apolloClient.wsClient) restartWebsockets(apolloClient.wsClient)
+  // if (apolloClient.wsClient) restartWebsockets(apolloClient.wsClient)
   try {
     await apolloClient.resetStore()
   } catch (e) {

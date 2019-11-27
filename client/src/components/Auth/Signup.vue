@@ -1,10 +1,12 @@
 <template>
   <v-container>
+    <v-btn @click="signupTest">TEST</v-btn>
     <v-row>
       <v-col cols="12" sm="8" offset-sm="2" lg="6" offset-lg="3">
         <v-card class="pa-5">
           <v-container class="pa-5">
             <v-form v-model="isFormValid" lazy-validation ref="form" @submit.prevent="signupUser">
+              <h3 v-if="errorMessage">{{ errorMessage }}</h3>
               <v-row>
                 <v-text-field v-model="username"
                   prepend-icon="mdi-face" 
@@ -19,6 +21,7 @@
                   label="Email" 
                   type="email"
                   :rules="emailRules"
+                  validate-on-blur
                   required></v-text-field>
               </v-row>
               <v-row>
@@ -35,20 +38,21 @@
                   label="Confirm Password"
                   type="password"
                   :rules="passwordRules"
+                  validate-on-blur
                   required></v-text-field>
               </v-row>
               <v-row class="ma-4 d-flex justify-end">
                 <v-btn class="ml-3" type="submit">Signup</v-btn>
               </v-row>
               <v-divider></v-divider>
-              <!-- <v-row class="ma-4 d-flex align-center">
+              <v-row class="ma-4 d-flex align-center">
                 <v-col cols="4">
                   <h3>Already have an account?</h3>
                 </v-col>
                 <v-col cols="4"> 
                   <v-btn @click="goToSignin">Signin</v-btn>
                 </v-col>
-              </v-row> -->
+              </v-row>
             </v-form>
           </v-container>
         </v-card>
@@ -61,20 +65,27 @@
 
 import db from '@/firebase/init';
 import firebase from 'firebase';
+import { CREATE_USER, UPDATE_CATEGORIES } from '@/queries';
+// import { GET_USER_DATA } from '@/queries';
 
 export default {
   name: 'Signup',
 
   data() {
     return {
-      isFormValid: true,
       email: '',
-      username: '',
+      errorMessage: '',
+      isFormValid: true,
       password: '',
       passwordConfirmation: '',
+      username: '',
       // form validation rules
       emailRules: [
         email => !!email || 'Please enter your email',
+        email => {
+          let regex = (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email));
+          return !!regex || 'This is not a valid email address';
+        },
       ],
       usernameRules: [
         username => !!username || 'Please enter your username',
@@ -87,47 +98,72 @@ export default {
   },
 
   methods: {
-    // goToSignin() {
-    //   this.$router.push('/enter/signin');
-    // },
-    signupUser() {
+
+    goToSignin() {
+      this.$router.push('/enter/signin');
+    },
+
+    async signupTest() {
+      console.log('test...');
+      try {
+        const variables = {
+          username: this.$store.state.user.username,
+          categories: [ { title: 'cat1', order: 0, color: '#555555'} ],
+        };
+        await this.$apollo.mutate({
+          mutation: UPDATE_CATEGORIES,
+          variables,
+        }); 
+      } catch (err) {
+        console.log('err', err);
+      }
+    },
+
+    async signupUser() {
       if (this.$refs.form.validate()) {
+        this.errorMessage = '';
 
-        let ref = db.collection('users').doc(this.username)
-        ref.get().then(doc => {
+        try {
+          let ref = db.collection('users').doc(this.username);
+          let doc = await ref.get();
           if (doc.exists) {
-            console.log('already exists');
+            let docExistsError = new Error();
+            docExistsError.name = 'docExists';
+            docExistsError.message = 'This username is already in use';
+            throw docExistsError;
+
           } else {
-            firebase.auth().createUserWithEmailAndPassword(this.email, this.password)
-              .then(cred => {
-                ref.set({
-                  targets: [],
-                  user_id: cred.user.uid,
-                })
-              })
-              .then(() => {
-                this.$router.push({ name: 'Targets' })
-              })
-              .catch(err => {
-                console.log('err', err.message);  // Can do something with the err / err.message to display to the user
-              });
+
+            let cred = await firebase.auth().createUserWithEmailAndPassword(this.email, this.password);
+            // console.log('cred', cred); 
+
+            const variables = { userId: cred.user.uid, username: this.username };
+            console.log('calling CREATE_USER with variables', variables);
+            let data = await this.$apollo.mutate({
+              mutation: CREATE_USER,
+              variables,
+            });
+            console.log('data', data);
+            let userData = data.data.createUserInStore;
+            
+            this.$store.commit('setUser', userData);
+
+            this.$refs.form.reset();
+            this.$router.push({ name: 'Targets' });
           }
-        })
-
-
-        // let user = {
-        //   username: this.username,
-        //   email: this.email,
-        //   password: this.password,
-        // };
-        // console.log('sign up user');
-        // console.dir(user);
-        // // SIGN IN USER WHEN AUTH SET
-        // this.$refs.form.reset();
+        } catch (err) {
+          if (err.name === 'docExists') {
+            this.errorMessage = err.message;
+          } else if (err.code === 'auth/email-already-in-use') {
+            this.errorMessage = 'This email address is already in use by another account';
+          } else {
+            this.errorMessage = 'Ooops! We have a problem.';
+            console.log('err', err.message);
+          }
+        }
       }
     },
   },
-
 
 }
 </script>

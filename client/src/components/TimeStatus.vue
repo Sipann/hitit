@@ -8,24 +8,54 @@
 <script>
 export default {
   name: 'TimeStatus',
-  props: ['timer', "width", "height"],
+  props: {
+    baseColor: {
+      type: String,
+      default: '#888',
+    },
+    height: {
+      type: String,
+      required: true,
+    },
+    timeColors: {
+      type: Array,
+      default: function() {
+        return ['green', 'orangered', 'red']
+      },
+      validator: function (value) {
+        return value.every(val => typeof val === 'string');
+      },
+    },
+    timer: {
+      type: Number,
+      default: 0,
+      validator: function (value) {
+        return value >=0 && value <= 1;
+      },
+    },
+    width: {
+      type: String,
+      required: true,
+    },
+  },
 
   data() {
     return {
-      baseColor: '#888',
       totalLength: 156.07,  
     };
   },
 
   computed: {
     timeColor() {
-      if (this.timer < 0.5) return 'red';
-      if (this.timer < 0.75) return 'yellow';
-      else return 'green';
+      if (this.timer < 0.5) return this.timeColors[2];
+      if (this.timer < 0.75) return this.timeColors[1];
+      else return this.timeColors[0];
     },
+
     timerStyle() {
       return `stroke-dasharray: ${this.totalLength * (1 - this.timer)} ${this.totalLength * this.timer }`;
     },
+
   },
 
 }

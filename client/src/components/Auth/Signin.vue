@@ -5,20 +5,14 @@
         <v-card class="pa-5">
           <v-container class="pa-5">
             <v-form v-model="isFormValid" lazy-validation ref="form" @submit.prevent="signinUser">
-              <!-- <v-row>
-                <v-text-field v-model="username"
-                  prepend-icon="mdi-face" 
-                  label="Username" 
-                  type="text"
-                  :rules="usernameRules"
-                  required></v-text-field>
-              </v-row> -->
+              <h3 v-if="errorMessage">{{ errorMessage }}</h3>
               <v-row>
                 <v-text-field v-model="email"
                   prepend-icon="mdi-mail" 
                   label="Email" 
                   type="text"
                   :rules="emailRules"
+                  validate-on-blur
                   required></v-text-field>
               </v-row>
               <v-row>
@@ -56,16 +50,18 @@ export default {
   name: 'Signin',
   data() {
     return {
-      isFormValid: true,
       email: '',
-      username: '',
+      errorMessage: '',
+      isFormValid: true,
       password: '',
+
       // form validation rules
       emailRules: [
         email => !!email || 'Please enter your email',
-      ],
-      usernameRules: [
-        username => !!username || 'Please enter your username',
+        email => {
+          let regex = (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email));
+          return !!regex || 'This is not a valid email address';
+        },
       ],
       passwordRules: [
         password => !!password || 'Please enter your password',
@@ -77,28 +73,21 @@ export default {
     goToSignup() {
       this.$router.push('/enter/signup');
     },
-    signinUser() {
+
+    async signinUser() {
       if (this.$refs.form.validate()) {
-
-        firebase.auth().signInWithEmailAndPassword(this.email, this.password)
-          .then(cred => {
-            console.log('cred.user', cred.user);
-            this.$router.push({ name: 'Targets' })
-          })
-          .catch(err => {
-            console.log('err', err.message);
-          });
-
-        // let user = {
-        //   username: this.username,
-        //   password: this.password,
-        // };
-        // console.log('sign in user');
-        // console.dir(user);
-        // // SIGN IN USER WHEN AUTH SET
-        // this.$refs.form.reset();
+        this.errorMessage = '';
+        try {
+          await firebase.auth().signInWithEmailAndPassword(this.email, this.password);
+          this.$refs.form.reset();
+          this.$router.push({ name: 'Targets' });
+        } catch (err) {
+          console.log('err', err);
+          this.errorMessage = 'We could not find an account with these credentials';
+        }
       }
     },
+
   },
 }
 </script>

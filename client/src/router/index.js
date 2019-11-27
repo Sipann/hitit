@@ -5,7 +5,7 @@ import Enter from '@/components/Auth/Enter.vue'
 import Signin from '@/components/Auth/Signin.vue'
 import Signup from '@/components/Auth/Signup.vue'
 import Profile from '@/components/Auth/Profile.vue'
-import TargetComponent from '@/components/TargetComponent.vue'
+import Target from '@/components/Target.vue'
 import Targets from '@/components/Targets.vue'
 
 import firebase from 'firebase'
@@ -43,18 +43,21 @@ const routes = [
     }
   },
   {
-    path: '/target',
+    path: '/targets/add',
     name: 'Target',
-    component: TargetComponent,
+    component: Target,
+    meta: {
+      requiresAuth: true,
+    },
   },
-  {
-    path: '/about',
-    name: 'about',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
-  }
+  // {
+  //   path: '/about',
+  //   name: 'about',
+  //   // route level code-splitting
+  //   // this generates a separate chunk (about.[hash].js) for this route
+  //   // which is lazy-loaded when the route is visited.
+  //   component: () => import(/* webpackChunkName: "about" */ '../views/About.vue')
+  // }
 ]
 
 
